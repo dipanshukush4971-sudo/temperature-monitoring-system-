@@ -1,0 +1,55 @@
+#include <LiquidCrystal_I2C.h>
+
+// I2C address is 0x20, 16 columns, 2 rows
+LiquidCrystal_I2C lcd(0x20, 16, 2);
+
+// Define the analog pin A0 for the temperature sensor (LM35)
+#define sensorPin A0
+
+void setup() {
+  // Init serial at 9600 baud
+  Serial.begin(9600);
+  
+  // Initialize the LCD display
+  lcd.init();
+  
+  // Turn on the backlight
+  lcd.backlight();
+  
+  // Display a welcome message
+  lcd.print("Temperature");
+  lcd.setCursor(0, 1); // Set cursor to the second line
+  lcd.print("Monitoring");
+  
+  delay(3000); // Wait for 3 seconds
+  
+  lcd.clear(); // Clear the screen
+}
+
+void loop() {
+  // Read Raw ADC Data (0-1023)
+  int adcData = analogRead(sensorPin);
+
+  // Convert ADC Data into voltage (assuming 5V reference)
+  // Voltage = (ADC_value / 1024.0) * 5.0
+  float voltage = (adcData / 1024.0) * 5.0;
+
+  // Convert the voltage into temperature (LM35: 10mV per degree C)
+  // Temperature = Voltage * 100
+  float temperatureC = voltage * 100.0;
+
+  // Print the temperature data to Serial
+  Serial.print("Temperature: ");
+  Serial.print(temperatureC, 1);
+  Serial.println(" C");
+
+  // Display temperature on LCD
+  // lcd.clear(); // Keeping this commented out improves display stability (avoids flicker)
+  lcd.setCursor(0, 0); // Start of the first line
+  lcd.print("Temp: ");
+  lcd.print(temperatureC, 1);
+  lcd.print((char)223); // Degree symbol
+  lcd.print("C  "); // Spaces to clear old characters
+
+  delay(500); // Wait 500ms between readings
+}
